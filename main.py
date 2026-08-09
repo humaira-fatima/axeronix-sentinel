@@ -60,5 +60,11 @@ def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = auth.create_access_token(data={"sub": str(db_user.id), "email": db_user.email})
+    access_token = auth.create_access_token(data={"sub": db_user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+# Protected Profile Endpoint (Requires Valid Bearer Token)
+@app.get("/users/me", response_model=schemas.UserResponse)
+def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
+    """Returns the profile of the currently authenticated user."""
+    return current_user
